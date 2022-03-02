@@ -1,35 +1,42 @@
-import React, {useContext, useState} from "react";
+import React, {useContext, useReducer} from "react";
 
 const AlertContext = React.createContext();
-// const AlertToggleContext = React.createContext();
+
+const SHOW_ALERT = 'show';
+const HIDE_ALERT = 'hide';
 
 export const useAlert = () => {
   return useContext(AlertContext);
 }
 
-// export const useAlertToggle = () => {
-//   return useContext(AlertToggleContext);
-// }
+const reducer = (state, action) => {
+  switch (action.type) {
+    case SHOW_ALERT:
+      return {...state, visible: true, text: action.text}
+    case HIDE_ALERT:
+      return {...state, visible: false}
+    default:
+      return state;
+  }
+}
 
 export const AlertProvider = ({children}) => {
-  const [alert, setAlert] = useState(false);
 
-  const toggle = () => {
-    setAlert(prevState => !prevState)
-  }
+  const [state, dispatch] = useReducer(reducer, {
+    visible: false,
+    text: ''
+  });
+
+  const show = text => dispatch({ type: SHOW_ALERT, text: text });
+
+  const hide = () => dispatch({type: HIDE_ALERT});
 
   return (
-    // Если экспортируем значение
-    // <AlertContext.Provider value={alert}>
-    //   <AlertToggleContext.Provider value={toggle}>
-    //     {children}
-    //   </AlertToggleContext.Provider>
-    // </AlertContext.Provider>
-
-    // Если экспортируем какой то объект
     <AlertContext.Provider value={{
-      visible: alert,
-      toggle
+      visible: state.visible,
+      text: state.text,
+      show,
+      hide
     }}>
      {children}
     </AlertContext.Provider>
